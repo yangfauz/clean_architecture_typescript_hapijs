@@ -14,8 +14,11 @@ export default {
       port: 5432,
       username: "postgres",
       password: "root",
-      database: "",
+      database: "digilib_db",
       entities: "**/**.entity{.ts,.js}"
-    }
+    },
+    token: {
+      secret_key: '23423523fdvfdghjre234kdnsbgjksdbgkdbsk'
+    },
 };
   

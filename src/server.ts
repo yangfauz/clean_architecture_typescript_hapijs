@@ -6,6 +6,11 @@ import { createConnection } from "typeorm";
 import { join } from 'path';
 import config from './config';
 
+import * as hapiJwt from 'hapi-auth-jwt2'
+import {User} from './api/user/user.entity'
+//import config from './config';
+import {validateUserId} from "./helper/hash-config";
+
 export default class Server {
 	private static _instance: Hapi.Server;
 	public static async start(): Promise<Hapi.Server> {
@@ -28,13 +33,25 @@ export default class Server {
 				entities: [join(__dirname, `${config.dbConfig.entities}`)]
 			}).then(async (connection) => {
 				console.log('Konek ke Database Sukses');
+
+				await Plugin.registerAll(Server._instance);
+
+				//JWT
+				Server._instance.register([hapiJwt]);
+				const userRepo = connection.getRepository(User)
+				Server._instance.auth.strategy('jwt', 'jwt', {
+					key: config.token.secret_key,
+					validate: validateUserId(userRepo),
+					verifyOptions: { algorithms: ['HS256'] }
+				})
+				Server._instance.auth.default('jwt')
+
 			}).catch(error => {
 				console.log('koneksi ke Database Gagal, '+error);	
 			});
 
-			await Plugin.registerAll(Server._instance);
 			await Router.loadRoutes(Server._instance);
-
+			
 			await Server._instance.start();
 
 			return Server._instance;

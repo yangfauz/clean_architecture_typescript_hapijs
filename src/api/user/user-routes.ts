@@ -21,7 +21,7 @@ export default class UserRoutes implements IRoute {
                     options: {
                         handler: controller.getAll,
                         description: 'Method that gets all users.',
-                        auth: false,
+                        auth: 'jwt',
                     },
                 },
                 {
